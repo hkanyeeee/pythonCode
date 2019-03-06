@@ -1,5 +1,4 @@
 # -*- coding: UTF-8 -*-
-# !/usr/bin/python2.7
 from flask import Flask
 from flask import jsonify
 import requests
