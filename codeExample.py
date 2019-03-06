@@ -14,8 +14,10 @@ def getHTMLText(url):
 def fillUnivList(ulist, html):
     soup = BeautifulSoup(html, "html.parser")
     for tr in soup.find('tbody').children:
+        # print(tr('td'))
         if isinstance(tr,bs4.element.Tag):
             tds = tr('td')
+            print(tds)
             ulist.append([tds[0].string, tds[1].string, tds[3].string])
 
 def printUnivList(ulist, num):

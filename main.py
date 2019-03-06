@@ -1,35 +1,73 @@
-# Copyright 2018 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-# [START gae_python37_app]
+# -*- coding: UTF-8 -*-
 from flask import Flask
-
+from flask import jsonify
+from flask import make_response
+import requests
+from bs4 import BeautifulSoup
+import sys
 
 # If `entrypoint` is not defined in app.yaml, App Engine will look for an app
 # called `app` in `main.py`.
 app = Flask(__name__)
 
-
 @app.route('/')
 def hello():
-    """Return a friendly HTTP greeting."""
-    return 'Hello World!'
+    # 转码
+    reload(sys)
+    sys.setdefaultencoding('utf-8')
+    # 机核
+    jiheWenzhangData = []
+    jiheXinwenData = []
+    viceWenzhangData = []
+    doubanBookData = []
+    doubanMovieData = []
+    a = requests.get('https://www.gcores.com/categories/1/originals')
+    b = requests.get('https://www.gcores.com/categories/2/originals')
+    c = requests.get('http://www.vice.cn/articles/page/1')
+    d = requests.get('https://movie.douban.com/review/best/')
+    e = requests.get('https://book.douban.com/review/best/')
+    # 处理机核Data
+    def getmakeJiheList(html, data):
+        soup = BeautifulSoup(html, "html.parser")
+        divData = soup.find_all(class_ = 'showcase_text')
+        for oneData in divData:
+            data.append({
+                'articalName': oneData.select('a')[0].string.strip('\n'),
+                'articalHref': oneData.select('a')[0]['href']
+            })
+        return data
+
+    # 处理Vice Data
+    def getmakeViceList(html, data):
+        soup = BeautifulSoup(html, "html.parser")
+        divData = soup.find_all(class_ = 'entry-title')
+        for oneData in divData:
+            data.append({
+                'articalName': oneData.select('a')[0].string.strip('\n'),
+                'articalHref': oneData.select('a')[0]['href']
+            })
+        return data
+
+    # 处理豆瓣 Data
+    def getmakeDoubanList(html, data):
+        soup = BeautifulSoup(html, "html.parser")
+        divData = soup.find_all(class_ = 'main-bd')
+        for oneData in divData:
+            data.append({
+                'articalName': oneData.select('h2')[0].select('a')[0].string,
+                'articalHref': oneData.select('h2')[0].select('a')[0]['href']
+            })
+        return data
+
+    return jsonify({
+        'jiheWenzhang': getmakeJiheList(a.text, jiheWenzhangData),
+        'jiheXinwen': getmakeJiheList(b.text, jiheXinwenData),
+        'viceWenzhang': getmakeViceList(c.text, viceWenzhangData),
+        'doubanMovieData': getmakeDoubanList(d.text, doubanMovieData),
+        'doubanBook': getmakeDoubanList(e.text, doubanBookData),
+        })
+
 
 
 if __name__ == '__main__':
-    # This is used when running locally only. When deploying to Google App
-    # Engine, a webserver process such as Gunicorn will serve the app. This
-    # can be configured by adding an `entrypoint` to app.yaml.
-    app.run(host='127.0.0.1', port=8080, debug=True)
-# [END gae_python37_app]
+    app.run(host = '0.0.0.0' ,port = 8080, debug = 'True')
