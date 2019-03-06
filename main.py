@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
+# !/usr/bin/python2.7
 from flask import Flask
 from flask import jsonify
-from flask import make_response
 import requests
 from bs4 import BeautifulSoup
 import sys
@@ -15,7 +15,7 @@ def hello():
     # 转码
     reload(sys)
     sys.setdefaultencoding('utf-8')
-    # 机核
+    
     jiheWenzhangData = []
     jiheXinwenData = []
     viceWenzhangData = []
@@ -26,6 +26,7 @@ def hello():
     c = requests.get('http://www.vice.cn/articles/page/1')
     d = requests.get('https://movie.douban.com/review/best/')
     e = requests.get('https://book.douban.com/review/best/')
+
     # 处理机核Data
     def getmakeJiheList(html, data):
         soup = BeautifulSoup(html, "html.parser")
