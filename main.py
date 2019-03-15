@@ -3,6 +3,7 @@ from flask import Flask
 from flask import jsonify
 import requests
 from bs4 import BeautifulSoup
+import urllib3
 # import sys
 
 # If `entrypoint` is not defined in app.yaml, App Engine will look for an app
@@ -14,7 +15,7 @@ def hello():
     # # 转码
     # reload(sys)
     # sys.setdefaultencoding('utf-8')
-    
+    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
     jiheWenzhangData = []
     jiheXinwenData = []
     viceWenzhangData = []
@@ -30,22 +31,26 @@ def hello():
     def getmakeJiheList(html, data):
         soup = BeautifulSoup(html, "html.parser")
         divData = soup.find_all(class_ = 'showcase_text')
+        print(type(divData))
         for oneData in divData:
-            data.append({
-                'articalName': oneData.select('a')[0].string.strip('\n'),
-                'articalHref': oneData.select('a')[0]['href']
-            })
+            if len(oneData.select('a')) > 0:
+                data.append({
+                    'articalName': oneData.select('a')[0].string.strip('\n'),
+                    'articalHref': oneData.select('a')[0]['href']
+                })
         return data
 
     # 处理Vice Data
     def getmakeViceList(html, data):
         soup = BeautifulSoup(html, "html.parser")
         divData = soup.find_all(class_ = 'entry-title')
+        print(type(divData))
         for oneData in divData:
-            data.append({
-                'articalName': oneData.select('a')[0].string.strip('\n'),
-                'articalHref': oneData.select('a')[0]['href']
-            })
+            if len(oneData.select('a')) > 0:
+                data.append({
+                    'articalName': oneData.select('a')[0].string.strip('\n'),
+                    'articalHref': oneData.select('a')[0]['href']
+                })
         return data
 
     # 处理豆瓣 Data
@@ -53,10 +58,12 @@ def hello():
         soup = BeautifulSoup(html, "html.parser")
         divData = soup.find_all(class_ = 'main-bd')
         for oneData in divData:
-            data.append({
-                'articalName': oneData.select('h2')[0].select('a')[0].string,
-                'articalHref': oneData.select('h2')[0].select('a')[0]['href']
-            })
+            if len(oneData.select('h2')[0]) > 0:
+                if len(oneData.select('h2')[0].select('a')[0]) > 0:
+                    data.append({
+                        'articalName': oneData.select('h2')[0].select('a')[0].string,
+                        'articalHref': oneData.select('h2')[0].select('a')[0]['href']
+                    })
         return data
 
     return jsonify({
