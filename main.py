@@ -10,8 +10,8 @@ import urllib3
 # called `app` in `main.py`.
 app = Flask(__name__)
 
-@app.route('/')
-def hello():
+@app.route('/news/<pager>')
+def hello(pager):
     # # 转码
     # reload(sys)
     # sys.setdefaultencoding('utf-8')
@@ -21,11 +21,19 @@ def hello():
     viceWenzhangData = []
     doubanBookData = []
     doubanMovieData = []
-    a = requests.get('https://www.gcores.com/categories/1/originals')
-    b = requests.get('https://www.gcores.com/categories/2/originals')
-    c = requests.get('http://www.vice.cn/articles/page/1')
-    d = requests.get('https://movie.douban.com/review/best/')
-    e = requests.get('https://book.douban.com/review/best/')
+    url1 = 'https://www.gcores.com/categories/1/originals?page=%s' % (pager)
+    url2 = 'https://www.gcores.com/categories/2/originals?page=%s' % (pager)
+    url3 = 'http://www.vice.cn/articles/page/%s' % (pager)
+    url4 = 'https://movie.douban.com/review/best/?start=40'
+    url5 = 'https://book.douban.com/review/best/?start=40'
+    if int(pager) < 4:
+        url4 = 'https://movie.douban.com/review/best/?start=%d' % ((int(pager) - 1)*20)
+        url5 = 'https://book.douban.com/review/best/?start=%d' % ((int(pager) - 1)*20)
+    a = requests.get(url1)
+    b = requests.get(url2)
+    c = requests.get(url3)
+    d = requests.get(url4)
+    e = requests.get(url5)
 
     # 处理机核Data
     def getmakeJiheList(html, data):
