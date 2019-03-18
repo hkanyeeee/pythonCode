@@ -21,11 +21,17 @@ def hello(pager):
     viceWenzhangData = []
     doubanBookData = []
     doubanMovieData = []
+    frontEndData = []
+    androidData = []
+    backEndData = []
     url1 = 'https://www.gcores.com/categories/1/originals?page=%s' % (pager)
     url2 = 'https://www.gcores.com/categories/2/originals?page=%s' % (pager)
     url3 = 'http://www.vice.cn/articles/page/%s' % (pager)
     url4 = 'https://movie.douban.com/review/best/?start=40'
     url5 = 'https://book.douban.com/review/best/?start=40'
+    url6 = 'https://juejin.im/welcome/frontend'
+    url7 = 'https://juejin.im/welcome/android'
+    url8 = 'https://juejin.im/welcome/backend'
     if int(pager) < 4:
         url4 = 'https://movie.douban.com/review/best/?start=%d' % ((int(pager) - 1)*20)
         url5 = 'https://book.douban.com/review/best/?start=%d' % ((int(pager) - 1)*20)
@@ -34,6 +40,9 @@ def hello(pager):
     c = requests.get(url3)
     d = requests.get(url4)
     e = requests.get(url5)
+    f = requests.get(url6)
+    g = requests.get(url7)
+    h = requests.get(url8)
 
     # 处理机核Data
     def getmakeJiheList(html, data):
@@ -74,12 +83,27 @@ def hello(pager):
                     })
         return data
 
+    # 处理掘金 Data
+    def getjuejinList(html, data):
+        soup = BeautifulSoup(html, "html.parser")
+        divData = soup.find_all(class_ = 'info-row title-row')
+        for oneData in divData:
+            if len(oneData.select('a')[0]) > 0:
+                data.append({
+                        'articalName': oneData.select('a')[0].string,
+                        'articalHref': oneData.select('a')[0]['href']
+                    })
+        return data
+
     return jsonify({
         'jiheWenzhang': getmakeJiheList(a.text, jiheWenzhangData),
         'jiheXinwen': getmakeJiheList(b.text, jiheXinwenData),
         'viceWenzhang': getmakeViceList(c.text, viceWenzhangData),
         'doubanMovieData': getmakeDoubanList(d.text, doubanMovieData),
         'doubanBook': getmakeDoubanList(e.text, doubanBookData),
+        'frontEnd' : getjuejinList(f.text, frontEndData),
+        'android' : getjuejinList(g.text, androidData),
+        'backEnd' : getjuejinList(h.text, backEndData)
         })
 
 
